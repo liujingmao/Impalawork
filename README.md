@@ -1,8 +1,14 @@
 # Impalawork
 
 ### Note About Impala Learning
+#### 1.About Impala
+#### 2.Install Impala
+#### 3.Impala Constructs
+#### 4.Impala Basic Usage
+#### 5.Adcanced Use of Impala
+#### 6.Impala Loader Balance
 
-### A HomeWork For Impala Learning
+### HomeWork For Impala Learning
 
 ###  业务背景
 
@@ -79,11 +85,9 @@ load data local inpath '/root/impala_data/clicklog.dat' into table user_clicklog
 
 使用Impala sql完成指标统计...
 
-
-
 使用Impala sql完成指标统计...
 
-作业思路：
+解决思路：
 
 1 根据用户id分组按照时间进行排序， 使用lag函数将上下数据关联
 
@@ -94,20 +98,19 @@ load data local inpath '/root/impala_data/clicklog.dat' into table user_clicklog
 4 最后使用row_number函数进行排序
 
 ```sql
-with q1 as (
+with w1 as (
 select user_id, click_time, 
 case when unix_timestamp(lead(click_time) over(partition by user_id order by click_time)) - unix_timestamp(click_time) > 1800 then 1 else 0 end split_flag 
 from user_clicklog
 ),
-q2 as (
+w2 as (
 select user_id, click_time, 
 sum(split_flag) over(partition by user_id order by click_time) as session_num 
-from q1
+from w1
 )
 select user_id, click_time, 
 row_number() over(partition by user_id, session_num order by click_time) 
-from q2
+from w2
 ```
 
 
-This a impala learning study note and homework
